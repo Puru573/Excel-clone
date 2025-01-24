@@ -11,21 +11,13 @@ for (let i=0;i<rows;i++){
         })
     }
 }
-const checkforBrackets=(encodedFormula)=>{
-    let latestString="";
-    let checkForBrackets=encodedFormula.split("");
-    for(let i=0;i<checkForBrackets.length;i++){
-        if(checkForBrackets[i]==="(" || checkForBrackets[i]===")"){
-            checkForBrackets[i]="";
-        }          
-    }
-    return latestString+=checkForBrackets.join("");
-}
 
 
 // when anyone writes formula in the formula bar i want to store them in the db and show them in the ui
  let formulabar=document.querySelector(".formula-bar");
  let inputformula;
+ let latestFormula="";
+
  formulabar.addEventListener("keydown",(e)=>{
     inputformula=formulabar.value;
     if(e.key==="Enter" && inputformula){
@@ -38,15 +30,27 @@ const checkforBrackets=(encodedFormula)=>{
         addChildToParent(inputformula);
     }
  })
+ const checkforBrackets=(encodedFormula)=>{
+    let brackets;
+   brackets= encodedFormula.split("");
+    for(let j=0;j<brackets.length;j++){
+        if(brackets[j] ==="(" || brackets[j]===")"){
+            brackets[j]="";
+        }
+    }
+    return brackets.join("");
+ }
 
  const addChildToParent=(inputformula)=>{
     let childAddress=addressBar.value;
     let encodedFormula=inputformula.split(" ");
     for(let i=0;i<encodedFormula.length;i++){
-        let latestFormula =checkforBrackets(encodedFormula[i]);
-        let asciiValue=latestFormula.charCodeAt(0);  //A1
+        if(encodedFormula[i]){
+            brackets=checkforBrackets(encodedFormula[i]);
+        }  
+        let asciiValue=brackets.charCodeAt(0);  //A1
         if(asciiValue>=65 && asciiValue<=90){
-            let [parentCell,parentCellProp]=activeCell(latestFormula);
+            let [parentCell,parentCellProp]=activeCell(brackets);
             parentCellProp.children.push(childAddress);
             console.log("parentCellProppp",parentCellProp);
         }
@@ -67,20 +71,23 @@ const checkforBrackets=(encodedFormula)=>{
  }
 
  const evaluatedFormula=(formula)=>{
+    let nobrackets;
     let encodedFormula=formula.split(" "); //"A1 + 10"
-    let latestFormula="";
+    let updatevalue=[];
     for(let i=0;i<encodedFormula.length;i++){
-       latestFormula+=checkforBrackets(encodedFormula[i]);
-
-        let asciiValue=latestFormula.charCodeAt(0);  //A1
+    if(encodedFormula[i]){
+        nobrackets=checkforBrackets(encodedFormula[i]);
+    }     
+        let asciiValue=nobrackets.charCodeAt(0);  //A1
         if(asciiValue>=65 && asciiValue<=90){
-            let [cell,cellProp]=activeCell(latestFormula);
-            latestFormula=cellProp.value; //storage value of that clicked cell i.e A1
+            let [cell,cellProp]=activeCell(nobrackets);
+            nobrackets=cellProp.value; //storage value of that clicked cell i.e A1
         }
+        updatevalue.push(nobrackets);
     }
-    console.log("latestString",latestFormula)
+    // console.log("latestString",latestFormula)
 
-    let decodedFormula=latestFormula;
+    let decodedFormula= updatevalue.join("");
         return eval(decodedFormula); //is going me to give the evaluated result of any expression }
  }
 
