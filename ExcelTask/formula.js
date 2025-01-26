@@ -7,7 +7,11 @@ for (let i=0;i<rows;i++){
             let address=addressBar.value;
             let [cell,cellProp]=activeCell(address);
             let enteredData=cell.innerText;
+            if(Number(cellProp.value)===Number(enteredData)) return;
             cellProp.value=enteredData;
+            removeChildFromParent(cellProp.formula);  // means it remove the dependency of e.g A1 and A2 have the children B1 this fn removes A1 and A2 children
+            cellProp.formula="";
+            updateChildrenCells(address);
         })
     }
 }
@@ -26,10 +30,25 @@ for (let i=0;i<rows;i++){
         let [cell,cellProp]=activeCell(address);
         let evaluatedVaue=evaluatedFormula(inputformula);
         if(inputformula !== cellProp.formula) removeChildFromParent(cellProp.formula)
-        setCellAndCellprop(evaluatedVaue,inputformula);
+        setCellAndCellprop(evaluatedVaue,inputformula,address);
         addChildToParent(inputformula);
+        console.log("sheetdb",sheetDB);
+        updateChildrenCells(address);
     }
  })
+
+ const updateChildrenCells=(address)=>{
+    let [parentCell,parentCellProp]=activeCell(address);
+    let children=parentCellProp.children;
+    for(let i=0;i<children.length;i++){
+        let childAddress=children[i];
+        let [cell,cellProp]=activeCell(childAddress);
+        let formula =cellProp.formula;
+        let evaluatedValue= evaluatedFormula(formula);
+        setCellAndCellprop(evaluatedValue,formula,childAddress);
+        updateChildrenCells(childAddress); //base case
+    }
+ }
  const checkforBrackets=(encodedFormula)=>{
     let brackets;
    brackets= encodedFormula.split("");
@@ -50,9 +69,9 @@ for (let i=0;i<rows;i++){
         }  
         let asciiValue=brackets.charCodeAt(0);  //A1
         if(asciiValue>=65 && asciiValue<=90){
+            // i.e (A1 + A2) in the formula bar and B1 in the address bar so the value get updated on the addressbar value and A1,A2 children consist of B1 on the children arr
             let [parentCell,parentCellProp]=activeCell(brackets);
             parentCellProp.children.push(childAddress);
-            console.log("parentCellProppp",parentCellProp);
         }
     }
  }
@@ -61,12 +80,26 @@ for (let i=0;i<rows;i++){
     let childAddress=addressBar.value;
     let encodedFormula=formula.split(" ");
     for(let i=0;i<encodedFormula.length;i++){
-        let asciiValue=encodedFormula[i].charCodeAt(0);  //A1
-        if(asciiValue>=65 && asciiValue<=90){
-            let [parentCell,parentCellProp]=activeCell(encodedFormula[i]);
-            let idx=parentCellProp.children.indexOf(childAddress);
-            parentCellProp.children.splice(idx,1);
+        if(encodedFormula[i]){
+            brackets=checkforBrackets(encodedFormula[i]);
+            let asciiValue=brackets.charCodeAt(0);  //A1
+            if(asciiValue>=65 && asciiValue<=90){
+                let [parentCell,parentCellProp]=activeCell(brackets);
+                // if addressBar value get changed than we remove the previous stored child in the parent and stored the new one from the addChildToParent 
+                let idx=parentCellProp.children.indexOf(childAddress);
+                parentCellProp.children.splice(idx,1);
+            }
+        }  
+        else{
+            let asciiValue=encodedFormula[i].charCodeAt(0);  //A1
+            if(asciiValue>=65 && asciiValue<=90){
+                let [parentCell,parentCellProp]=activeCell(encodedFormula[i]);
+                // if addressBar value get changed than we remove the previous stored child in the parent and stored the new one from the addChildToParent 
+                let idx=parentCellProp.children.indexOf(childAddress);
+                parentCellProp.children.splice(idx,1);
+            }
         }
+       
     }
  }
 
@@ -91,9 +124,9 @@ for (let i=0;i<rows;i++){
         return eval(decodedFormula); //is going me to give the evaluated result of any expression }
  }
 
- const setCellAndCellprop=(evaluatedVaue,inputformula)=>{
-    let address = addressBar.value;
+ const setCellAndCellprop=(evaluatedVaue,inputformula,address)=>{
     let [cell,cellProp]=activeCell(address);
+    // saving the addressbarvalue in the ui as well as in the storage in the form of value and formula
     cell.innerText=evaluatedVaue;//ui
     cellProp.value=evaluatedVaue;
     cellProp.formula=inputformula;

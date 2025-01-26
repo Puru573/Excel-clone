@@ -176,7 +176,9 @@ const  addListernerstoAttachCellProperties=(cell)=>{
                 rightAlign.style.backgroundColor=activebg;
             break;
         }
-
+        let formulaBar=document.querySelector(".formula-bar");
+        formulaBar.value=cellprop.formula;
+        cell.value=cellprop.value;
     })
 }
 
