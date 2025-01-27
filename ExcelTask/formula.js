@@ -28,18 +28,20 @@ for (let i=0;i<rows;i++){
         // if change in formula break old p-c relationship,evaluate new formula, and new pc relation
         let address=addressBar.value;
         let [cell,cellProp]=activeCell(address);
-        addChildToGraphComponent(inputformula,address);//by by inputformula we will extract parentaddress and by address extract childaddress
+      
+         
+        if(inputformula !== cellProp.formula) removeChildFromParent(cellProp.formula)
+            addChildToGraphComponent(inputformula,address);//by by inputformula we will extract parentaddress and by address extract childaddress
         // check forumula is cyclic or not 
         // true => cyclic or false => non-cyclic
-        let iscyclic=isGraphCyclic();
+        let iscyclic=isGraphCyclic(graphComponentMatrix);
         if(iscyclic){
             alert("Your formula is cyclic");
             removeChildFromGraphComponent(inputformula,address);
             return;
         }
-         
         let evaluatedVaue=evaluatedFormula(inputformula);
-        if(inputformula !== cellProp.formula) removeChildFromParent(cellProp.formula)
+
         setCellAndCellprop(evaluatedVaue,inputformula,address);
         addChildToParent(inputformula);
         console.log("sheetdb",sheetDB);
@@ -51,11 +53,15 @@ for (let i=0;i<rows;i++){
     let [crid,ccid]=decodeAddressBar(address);
     let encodedFormula=formula.split(" ");
     for(let i=0;i<encodedFormula.length;i++){
-        let asciiValue=encodedFormula[i].charCodeAt(0);  //A1
-            if(asciiValue>=65 && asciiValue<=90){
-                let [prid,pcid]=decodeAddressBar(encodedFormula[i]);
-                graphComponentMatrix[prid][pcid].push([crid,ccid]);//
-            }
+        if(encodedFormula[i]){
+            brackets=checkforBrackets(encodedFormula[i]);
+        }  
+        let asciiValue=brackets.charCodeAt(0);  //A1
+        if(asciiValue>=65 && asciiValue<=90){
+            // i.e (A1 + A2) in the formula bar and B1 in the address bar so the value get updated on the addressbar value and A1,A2 children consist of B1 on the children arr
+            let [prid,pcid]=decodeAddressBar(brackets);
+            graphComponentMatrix[prid][pcid].push([crid,ccid]);
+        }
     }
  }
 
@@ -63,13 +69,15 @@ for (let i=0;i<rows;i++){
     let [crid,ccid]=decodeAddressBar(address);
     let encodedFormula=formula.split(" ");
     for(let i=0;i<encodedFormula.length;i++){
-        let asciiValue=encodedFormula[i].charCodeAt(0);  //A1
-            if(asciiValue>=65 && asciiValue<=90){
-                let [prid,pcid]=decodeAddressBar(encodedFormula[i]);
-                // B1 : A1 + 10
-                // rid => i , cid => j
-                graphComponentMatrix[prid][pcid].pop();//
-            }
+        if(encodedFormula[i]){
+            brackets=checkforBrackets(encodedFormula[i]);
+        }  
+        let asciiValue=brackets.charCodeAt(0);  //A1
+        if(asciiValue>=65 && asciiValue<=90){
+            // i.e (A1 + A2) in the formula bar and B1 in the address bar so the value get updated on the addressbar value and A1,A2 children consist of B1 on the children arr
+            let [prid,pcid]=decodeAddressBar(brackets);
+            graphComponentMatrix[prid][pcid].pop();
+        }
     }
  }
 
