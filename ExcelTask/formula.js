@@ -22,7 +22,7 @@ for (let i=0;i<rows;i++){
  let inputformula;
  let latestFormula="";
 
- formulabar.addEventListener("keydown",(e)=>{
+ formulabar.addEventListener("keydown",async(e)=>{
     inputformula=formulabar.value;
     if(e.key==="Enter" && inputformula){
         // if change in formula break old p-c relationship,evaluate new formula, and new pc relation
@@ -34,9 +34,14 @@ for (let i=0;i<rows;i++){
             addChildToGraphComponent(inputformula,address);//by by inputformula we will extract parentaddress and by address extract childaddress
         // check forumula is cyclic or not 
         // true => cyclic or false => non-cyclic
-        let iscyclic=isGraphCyclic(graphComponentMatrix);
-        if(iscyclic){
-            alert("Your formula is cyclic");
+        let cycleResponse=isGraphCyclic(graphComponentMatrix);
+        if(cycleResponse){
+            // so we continouslly ask the user that he is satisfied or not
+            let response=confirm("your formula is cyclic do you want to trace your patH?");
+            while(response===true){
+                await isGraphCyclicTracePath(graphComponentMatrix,cycleResponse);
+                response=confirm("your formula is cyclic do you want to trace your patH?");
+            }
             removeChildFromGraphComponent(inputformula,address);
             return;
         }
