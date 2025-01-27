@@ -28,6 +28,16 @@ for (let i=0;i<rows;i++){
         // if change in formula break old p-c relationship,evaluate new formula, and new pc relation
         let address=addressBar.value;
         let [cell,cellProp]=activeCell(address);
+        addChildToGraphComponent(inputformula,address);//by by inputformula we will extract parentaddress and by address extract childaddress
+        // check forumula is cyclic or not 
+        // true => cyclic or false => non-cyclic
+        let iscyclic=isGraphCyclic();
+        if(iscyclic){
+            alert("Your formula is cyclic");
+            removeChildFromGraphComponent(inputformula,address);
+            return;
+        }
+         
         let evaluatedVaue=evaluatedFormula(inputformula);
         if(inputformula !== cellProp.formula) removeChildFromParent(cellProp.formula)
         setCellAndCellprop(evaluatedVaue,inputformula,address);
@@ -36,6 +46,32 @@ for (let i=0;i<rows;i++){
         updateChildrenCells(address);
     }
  })
+
+ const addChildToGraphComponent=(formula,address)=>{
+    let [crid,ccid]=decodeAddressBar(address);
+    let encodedFormula=formula.split(" ");
+    for(let i=0;i<encodedFormula.length;i++){
+        let asciiValue=encodedFormula[i].charCodeAt(0);  //A1
+            if(asciiValue>=65 && asciiValue<=90){
+                let [prid,pcid]=decodeAddressBar(encodedFormula[i]);
+                graphComponentMatrix[prid][pcid].push([crid,ccid]);//
+            }
+    }
+ }
+
+ const removeChildFromGraphComponent=(formula,address)=>{
+    let [crid,ccid]=decodeAddressBar(address);
+    let encodedFormula=formula.split(" ");
+    for(let i=0;i<encodedFormula.length;i++){
+        let asciiValue=encodedFormula[i].charCodeAt(0);  //A1
+            if(asciiValue>=65 && asciiValue<=90){
+                let [prid,pcid]=decodeAddressBar(encodedFormula[i]);
+                // B1 : A1 + 10
+                // rid => i , cid => j
+                graphComponentMatrix[prid][pcid].pop();//
+            }
+    }
+ }
 
  const updateChildrenCells=(address)=>{
     let [parentCell,parentCellProp]=activeCell(address);
