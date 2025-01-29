@@ -45,10 +45,9 @@ let allgridboxes=document.querySelectorAll(".gridboxes");
             addressBar.value=`${colIndex}${rowIndex}`
         })
     })
+    // so the index value is like 0,1,2 upto 99 and addressbar value is set according to that
 
-// by default click on first cell
-let firstcell=document.querySelector(".gridboxes");
-firstcell.click();
+
 
 
 

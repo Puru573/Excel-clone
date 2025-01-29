@@ -1,32 +1,18 @@
 let sheetDB=[];
+let collectedSheetDB=[]; //contains all sheetdb
 
-for(let i=0;i<rows;i++){
-    let subarr=[];
-    for(let j=0;j<col;j++){
-        let cellProp={
-            bold:false,
-            italic:false,
-            underline:false,
-            alignment:"left",
-            fontfamily:"monospace",
-            fontSize:14,
-            fontColor:"#000000",
-            bgColor:"#000000",  //just for identification purpose
-            value:"",
-            formula:"",
-            children:[]
-        }
-        subarr.push(cellProp);
-    }
-    sheetDB.push(subarr);
+
+{
+    let addSheetBtn=document.querySelector(".add-icon");
+    addSheetBtn.click();
 }
 
 let bold=document.querySelector(".bold");
 let italic=document.querySelector(".italic");
 let underlined=document.querySelector(".underlined");
-let alignment=document.querySelectorAll(".alignment");
 let fontSize=document.querySelector(".font-size-prop");
 let fontFamily=document.querySelector(".font-family-prop");
+let alignment=document.querySelectorAll(".alignment");
 let leftAlign=alignment[0];
 let middleAlign=alignment[1];
 let rightAlign=alignment[2];
@@ -73,8 +59,8 @@ fontSize.addEventListener("change",()=>{
 fontFamily.addEventListener("change",()=>{
     addressbarValue=addressBar.value;
     let [cell,cellprop]=activeCell(addressbarValue);
-    cellprop.fontFamily=fontFamily.value;
-    cell.style.fontFamily=cellprop.fontFamily;
+    cellprop.fontfamily=fontFamily.value;
+    cell.style.fontFamily=cellprop.fontfamily;
 })
 
 fontColor.addEventListener("change",()=>{
@@ -96,8 +82,8 @@ alignment.forEach((alignitem)=>{
         addressbarValue=addressBar.value;
         let [cell,cellprop]=activeCell(addressbarValue);
         let alignValue=e.target.classList[0];
-        cellprop.alignment=alignValue;
-        cell.style.textAlign=cellprop.alignment;
+        cellprop.alignment=alignValue; //ui change
+        cell.style.textAlign=cellprop.alignment;  //storage change
 
         switch(alignValue){
             case "left":
@@ -133,7 +119,7 @@ const activeCell=(addressbarValue)=>{
 const decodeAddressBar=(addressbarValue)=>{
     // A1 encode
     let rid=Number(addressbarValue.slice(1) - 1); // 1 to 0
-    let cid=Number(addressbarValue.charCodeAt(0)) - 65 //A to 65
+    let cid=Number(addressbarValue.charCodeAt(0)) - 65 //A to 65 i.e 0
     return [rid,cid];
 }
 
@@ -152,7 +138,7 @@ const  addListernerstoAttachCellProperties=(cell)=>{
         cell.style.color=cellprop.fontColor;
         cell.style.backgroundColor=cellprop.bgColor ==="#000000"? "transparent" : cellprop.bgColor;
         cell.style.textAlign=cellprop.alignment;
-
+        // this will really mendatory when you switch the sheet i.e move from one sheet to another sheet the above code
         // ui changes
         bold.style.backgroundColor = cellprop.bold ? activebg : deactivebg; // bold icon bg color
         italic.style.backgroundColor = cellprop.italic ? activebg : deactivebg;
@@ -178,7 +164,7 @@ const  addListernerstoAttachCellProperties=(cell)=>{
         }
         let formulaBar=document.querySelector(".formula-bar");
         formulaBar.value=cellprop.formula;
-        cell.value=cellprop.value;
+        cell.innerText=cellprop.value;
     })
 }
 
