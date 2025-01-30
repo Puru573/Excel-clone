@@ -49,7 +49,6 @@ for (let i=0;i<rows;i++){
 
         setCellAndCellprop(evaluatedVaue,inputformula,address);
         addChildToParent(inputformula);
-        console.log("sheetdb",sheetDB);
         updateChildrenCells(address);
     }
  })
@@ -167,8 +166,6 @@ for (let i=0;i<rows;i++){
         }
         updatevalue.push(nobrackets);
     }
-    // console.log("latestString",latestFormula)
-
     let decodedFormula= updatevalue.join("");
         return eval(decodedFormula); //is going me to give the evaluated result of any expression }
  }
