@@ -2,6 +2,7 @@ let ctrlKey;
 let borderColor="#1abc9c";
 let copybtn=document.querySelector(".copy");
 let pastebtn=document.querySelector(".paste");
+let cutbtn=document.querySelector(".cut");
 document.addEventListener("keydown",(e)=>{
     ctrlKey=e.ctrlKey;
 })
@@ -43,10 +44,7 @@ let copyData=[];
 copybtn.addEventListener("click",(e)=>{
     if(rangeStorage.length < 2) return;
     copyData=[];  //when you copy another data the first Data which has been copied get removed(start with the new one buddy!!)
-    let stRow=rangeStorage[0][0];
-    let stCol=rangeStorage[0][1];
-    let endRow=rangeStorage[1][0];
-    let endCol=rangeStorage[1][1];
+    let [stRow,stCol,endRow,endCol]=[rangeStorage[0][0],rangeStorage[0][1],rangeStorage[1][0],rangeStorage[1][1],]
     for(let i=stRow ;i<=endRow;i++){
         let copyRow=[];
         for(let j=stCol ;j<=endCol;j++){  //it will consist of a box which have all the details of properties i.e applied on the cell
@@ -77,9 +75,9 @@ pastebtn.addEventListener("click",(e)=>{
             cellprop.value=data.value;
             cellprop.bold=data.bold;
             cellprop.italic=data.italic;
-            cellprop.underline=data.underline;
+            cellprop.underlined=data.underlined;
             cellprop.fontSize=data.fontSize;
-            cellprop.fontFamily=data.fontFamily;
+            cellprop.fontfamily=data.fontfamily;
             cellprop.fontColor=data.fontColor;
             cellprop.bgColor=data.bgColor;
             cellprop.alignment=data.alignment;
@@ -87,12 +85,34 @@ pastebtn.addEventListener("click",(e)=>{
             // the above code will change the main storage according to the copied data;
             // ui 
             cell.click(); //on click the changes will show in the ui
-
         }
     }
 })
 
+// cut btn logic
+cutbtn.addEventListener("click",(e)=>{
+    if(rangeStorage.length < 2) return;
+    let [stRow,stCol,endRow,endCol]=[rangeStorage[0][0],rangeStorage[0][1],rangeStorage[1][0],rangeStorage[1][1],]
+    
+    for(let i=stRow ;i<=endRow;i++){
+        for(let j=stCol ;j<=endCol;j++){  //it will consist of a box which have all the details of properties i.e applied on the cell
+            let cellProp=sheetDB[i][j];//consist of properties
+            let cell=document.querySelector(`.gridboxes[rid="${i}"][cid="${j}"]`);
+            // db change
+            cellProp.value="";
+            cellProp.bold=false;
+            cellProp.italic=false;
+            cellProp.underlined=false;
+            cellProp.fontSize=14;
+            cellProp.fontfamily="monospace";
+            cellProp.fontColor="#00000";
+            cellProp.bgColor="#00000";
+            cellProp.alignment="left";
 
-
-
-
+            // ui
+            cell.click();
+        }
+    }
+    // to remove the selected border
+    handlesSelectedCellsUI(rangeStorage);
+})

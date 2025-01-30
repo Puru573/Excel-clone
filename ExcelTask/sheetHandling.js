@@ -14,6 +14,8 @@ addSheetBtn.addEventListener("click",()=>{
     </div>
     `
     sheetCont.appendChild(sheet);
+    sheet.scrollIntoView();
+    // it will show me the latest active sheet without scrolling
     // DB of sheets 
     createSheetDB();
     createdGraphComponentMatrix();
